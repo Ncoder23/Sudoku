@@ -3,8 +3,10 @@ import { SudokuGrid } from './components/SudokuGrid';
 import { GameControls } from './components/GameControls';
 import { generateSudoku, validateGrid, isGridComplete } from './utils/sudokuUtils';
 import type { GameState, Cell } from './types/sudoku';
+import { useTheme } from './theme';
 
 function App() {
+  const { theme, toggle } = useTheme();
   const [gameState, setGameState] = useState<GameState>({
     grid: generateSudoku(),
     selectedCell: null,
@@ -12,6 +14,50 @@ function App() {
     timeElapsed: 0,
     isPaused: false,
   });
+
+  // Keyboard input handler
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (gameState.isPaused || gameState.isComplete) return;
+      if (!gameState.selectedCell) return;
+      const [row, col] = gameState.selectedCell;
+      // Number input (1-9)
+      if (/^[1-9]$/.test(e.key)) {
+        handleNumberInput(Number(e.key));
+      }
+      // Backspace or Delete to clear
+      if (e.key === 'Backspace' || e.key === 'Delete') {
+        handleNumberInput(null);
+      }
+      // Arrow keys for navigation
+      if (e.key === 'ArrowUp') {
+        setGameState(prev => ({
+          ...prev,
+          selectedCell: [Math.max(0, row - 1), col],
+        }));
+      }
+      if (e.key === 'ArrowDown') {
+        setGameState(prev => ({
+          ...prev,
+          selectedCell: [Math.min(8, row + 1), col],
+        }));
+      }
+      if (e.key === 'ArrowLeft') {
+        setGameState(prev => ({
+          ...prev,
+          selectedCell: [row, Math.max(0, col - 1)],
+        }));
+      }
+      if (e.key === 'ArrowRight') {
+        setGameState(prev => ({
+          ...prev,
+          selectedCell: [row, Math.min(8, col + 1)],
+        }));
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [gameState.selectedCell, gameState.isPaused, gameState.isComplete]);
 
   useEffect(() => {
     let timer: number;
@@ -33,7 +79,7 @@ function App() {
     }));
   }, []);
 
-  const handleNumberInput = useCallback((number: number) => {
+  const handleNumberInput = useCallback((number: number | null) => {
     if (gameState.selectedCell === null) return;
 
     const [row, col] = gameState.selectedCell;
@@ -71,11 +117,9 @@ function App() {
   }, [gameState.grid]);
 
   const handleSolvePuzzle = useCallback(() => {
-    // This would be implemented using the solveSudoku function
-    // For now, we'll just generate a new solved puzzle
     setGameState(prev => ({
       ...prev,
-      grid: generateSudoku(0), // 0 means no cells removed
+      grid: generateSudoku(0),
       isComplete: true,
     }));
   }, []);
@@ -98,11 +142,18 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8 px-4">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-8 px-4 relative">
+      <button
+        onClick={toggle}
+        className="absolute right-4 top-4 p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+        aria-label="Toggle theme"
+      >
+        {theme === 'dark' ? '🌙' : '☀️'}
+      </button>
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-8">Sudoku</h1>
+        <h1 className="text-3xl font-bold text-center mb-8 text-gray-800 dark:text-gray-100">Sudoku</h1>
         
-        <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
           <SudokuGrid
             grid={gameState.grid}
             selectedCell={gameState.selectedCell}
