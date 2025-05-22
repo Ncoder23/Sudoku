@@ -81,6 +81,7 @@ function App() {
   }, []);
 
   const handleNumberInput = useCallback((number: number | null) => {
+    setFeedback(null);
     if (gameState.selectedCell === null) return;
 
     const [row, col] = gameState.selectedCell;
@@ -104,11 +105,12 @@ function App() {
     setGameState(prev => ({
       ...prev,
       grid: validatedGrid,
-      isComplete,
+      //isComplete,
     }));
   }, [gameState.selectedCell, gameState.grid]);
 
   const handleCheckSolution = useCallback(() => {
+    setFeedback(null);
     if (!isGridComplete(gameState.grid)) {
       setFeedback('Please fill all cells before checking!');
       return;
