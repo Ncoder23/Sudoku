@@ -1,5 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -24,8 +28,6 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
 }
@@ -65,4 +67,23 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
+
+/* Custom styles for Sudoku grid */
+.grid-cols-9 {
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+}
+
+/* Add borders for 3x3 boxes */
+.grid-cols-9 > div:nth-child(3n) {
+  border-right: 2px solid #4b5563;
+}
+
+.grid-cols-9 > div:nth-child(9n) {
+  border-right: none;
+}
+
+.grid-cols-9 > div:nth-child(n+19):nth-child(-n+27),
+.grid-cols-9 > div:nth-child(n+46):nth-child(-n+54) {
+  border-bottom: 2px solid #4b5563;
 }

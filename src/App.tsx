@@ -1,35 +1,134 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useEffect, useCallback } from 'react';
+import { SudokuGrid } from './components/SudokuGrid';
+import { GameControls } from './components/GameControls';
+import { generateSudoku, validateGrid, isGridComplete } from './utils/sudokuUtils';
+import type { GameState, Cell } from './types/sudoku';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [gameState, setGameState] = useState<GameState>({
+    grid: generateSudoku(),
+    selectedCell: null,
+    isComplete: false,
+    timeElapsed: 0,
+    isPaused: false,
+  });
+
+  useEffect(() => {
+    let timer: number;
+    if (!gameState.isPaused && !gameState.isComplete) {
+      timer = window.setInterval(() => {
+        setGameState(prev => ({
+          ...prev,
+          timeElapsed: prev.timeElapsed + 1,
+        }));
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [gameState.isPaused, gameState.isComplete]);
+
+  const handleCellSelect = useCallback((row: number, col: number) => {
+    setGameState(prev => ({
+      ...prev,
+      selectedCell: [row, col],
+    }));
+  }, []);
+
+  const handleNumberInput = useCallback((number: number) => {
+    if (gameState.selectedCell === null) return;
+
+    const [row, col] = gameState.selectedCell;
+    const currentRow = gameState.grid[row];
+    if (!currentRow) return;
+    
+    const currentCell = currentRow[col];
+    if (!currentCell || currentCell.isInitial) return;
+
+    const newGrid = gameState.grid.map(r => [...r]) as Cell[][];
+    newGrid[row]![col]! = {
+      value: number,
+      isInitial: false,
+      isValid: true,
+    };
+
+    const validatedGrid = validateGrid(newGrid);
+    const isComplete = isGridComplete(validatedGrid);
+
+    setGameState(prev => ({
+      ...prev,
+      grid: validatedGrid,
+      isComplete,
+    }));
+  }, [gameState.selectedCell, gameState.grid]);
+
+  const handleCheckSolution = useCallback(() => {
+    const validatedGrid = validateGrid(gameState.grid);
+    const isComplete = isGridComplete(validatedGrid);
+    setGameState(prev => ({
+      ...prev,
+      grid: validatedGrid,
+      isComplete,
+    }));
+  }, [gameState.grid]);
+
+  const handleSolvePuzzle = useCallback(() => {
+    // This would be implemented using the solveSudoku function
+    // For now, we'll just generate a new solved puzzle
+    setGameState(prev => ({
+      ...prev,
+      grid: generateSudoku(0), // 0 means no cells removed
+      isComplete: true,
+    }));
+  }, []);
+
+  const handleReset = useCallback(() => {
+    setGameState({
+      grid: generateSudoku(),
+      selectedCell: null,
+      isComplete: false,
+      timeElapsed: 0,
+      isPaused: false,
+    });
+  }, []);
+
+  const handlePause = useCallback(() => {
+    setGameState(prev => ({
+      ...prev,
+      isPaused: !prev.isPaused,
+    }));
+  }, []);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="min-h-screen bg-gray-100 py-8 px-4">
+      <div className="max-w-2xl mx-auto">
+        <h1 className="text-3xl font-bold text-center mb-8">Sudoku</h1>
+        
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <SudokuGrid
+            grid={gameState.grid}
+            selectedCell={gameState.selectedCell}
+            onCellSelect={handleCellSelect}
+          />
+          
+          <GameControls
+            onCellSelect={handleCellSelect}
+            onNumberInput={handleNumberInput}
+            onCheckSolution={handleCheckSolution}
+            onSolvePuzzle={handleSolvePuzzle}
+            onReset={handleReset}
+            onPause={handlePause}
+            timeElapsed={gameState.timeElapsed}
+            isPaused={gameState.isPaused}
+          />
+
+          {gameState.isComplete && (
+            <div className="mt-4 text-center text-green-600 font-bold">
+              Congratulations! You've completed the puzzle!
+            </div>
+          )}
+        </div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </div>
+  );
 }
 
-export default App
+export default App;
