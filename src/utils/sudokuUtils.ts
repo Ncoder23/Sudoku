@@ -75,8 +75,19 @@ export const generateSudoku = (difficulty: number = 40): Cell[][] => {
   return puzzleGrid;
 };
 
-export const validateGrid = (grid: Cell[][]): Cell[][] => {
+// Only check for invalid cells if checkAll is true
+export const validateGrid = (grid: Cell[][], checkAll = false): Cell[][] => {
   const newGrid = JSON.parse(JSON.stringify(grid));
+
+  if (!checkAll) {
+    // Just return the grid, don't mark invalids
+    for (let row = 0; row < 9; row++) {
+      for (let col = 0; col < 9; col++) {
+        newGrid[row][col].isValid = true;
+      }
+    }
+    return newGrid;
+  }
 
   for (let row = 0; row < 9; row++) {
     for (let col = 0; col < 9; col++) {
@@ -100,8 +111,43 @@ export const validateGrid = (grid: Cell[][]): Cell[][] => {
 export const isGridComplete = (grid: Cell[][]): boolean => {
   for (let row = 0; row < 9; row++) {
     for (let col = 0; col < 9; col++) {
-      if (grid[row]![col]!.value === null || !grid[row]![col]!.isValid) {
+      if (grid[row]![col]!.value === null) {
         return false;
+      }
+    }
+  }
+  return true;
+};
+
+export const isBoardValid = (grid: Cell[][]): boolean => {
+  // Check rows
+  for (let row = 0; row < 9; row++) {
+    const seen = new Set();
+    for (let col = 0; col < 9; col++) {
+      const val = grid[row]![col]!.value;
+      if (val === null || seen.has(val)) return false;
+      seen.add(val);
+    }
+  }
+  // Check columns
+  for (let col = 0; col < 9; col++) {
+    const seen = new Set();
+    for (let row = 0; row < 9; row++) {
+      const val = grid[row]![col]!.value;
+      if (val === null || seen.has(val)) return false;
+      seen.add(val);
+    }
+  }
+  // Check 3x3 blocks
+  for (let boxRow = 0; boxRow < 3; boxRow++) {
+    for (let boxCol = 0; boxCol < 3; boxCol++) {
+      const seen = new Set();
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          const val = grid[boxRow * 3 + i]![boxCol * 3 + j]!.value;
+          if (val === null || seen.has(val)) return false;
+          seen.add(val);
+        }
       }
     }
   }

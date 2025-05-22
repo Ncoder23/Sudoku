@@ -24,6 +24,7 @@ export const SudokuGrid: React.FC<SudokuGridProps> = ({
           : 'border-b border-gray-400 dark:border-gray-500';
         const borderLeft = colIndex === 0 ? 'border-l border-black dark:border-white' : '';
         const borderTop = rowIndex === 0 ? 'border-t border-black dark:border-white' : '';
+        
         const cellClass = `${borderRight} ${borderBottom} ${borderLeft} ${borderTop}`;
         return (
           <div className={cellClass} key={`${rowIndex}-${colIndex}`}>

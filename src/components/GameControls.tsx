@@ -6,38 +6,16 @@ interface GameControlsProps extends GameControlsType {
 }
 
 export const GameControls: React.FC<GameControlsProps> = ({
-  onNumberInput,
+
   onCheckSolution,
   onSolvePuzzle,
   onReset,
   onPause,
-  timeElapsed,
   isPaused,
 }) => {
-  const formatTime = (seconds: number): string => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
-
   return (
-    <div className="mt-6 space-y-4">
-      <div className="text-2xl font-bold text-center">
-        {formatTime(timeElapsed)}
-      </div>
+    <div className="mt-4">
       
-      <div className="grid grid-cols-3 gap-2">
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-          <button
-            key={num}
-            onClick={() => onNumberInput(num)}
-            className="p-2 text-lg font-medium bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-          >
-            {num}
-          </button>
-        ))}
-      </div>
-
       <div className="grid grid-cols-2 gap-2">
         <button
           onClick={onCheckSolution}

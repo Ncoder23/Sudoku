@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { SudokuGrid } from './components/SudokuGrid';
 import { GameControls } from './components/GameControls';
-import { generateSudoku, validateGrid, isGridComplete } from './utils/sudokuUtils';
+import { generateSudoku, validateGrid, isGridComplete, isBoardValid } from './utils/sudokuUtils';
 import type { GameState, Cell } from './types/sudoku';
 import { useTheme } from './theme';
 
@@ -14,6 +14,7 @@ function App() {
     timeElapsed: 0,
     isPaused: false,
   });
+  const [feedback, setFeedback] = useState<string | null>(null);
 
   // Keyboard input handler
   useEffect(() => {
@@ -96,7 +97,8 @@ function App() {
       isValid: true,
     };
 
-    const validatedGrid = validateGrid(newGrid);
+    // Do not validate for invalids during play
+    const validatedGrid = validateGrid(newGrid, false);
     const isComplete = isGridComplete(validatedGrid);
 
     setGameState(prev => ({
@@ -107,13 +109,20 @@ function App() {
   }, [gameState.selectedCell, gameState.grid]);
 
   const handleCheckSolution = useCallback(() => {
-    const validatedGrid = validateGrid(gameState.grid);
-    const isComplete = isGridComplete(validatedGrid);
+    if (!isGridComplete(gameState.grid)) {
+      setFeedback('Please fill all cells before checking!');
+      return;
+    }
+    const validatedGrid = validateGrid(gameState.grid, true);
+    const allValid = isBoardValid(validatedGrid);
     setGameState(prev => ({
       ...prev,
       grid: validatedGrid,
-      isComplete,
+      isComplete: allValid,
     }));
+    setFeedback(allValid
+      ? 'Congratulations! You\'ve completed the puzzle!'
+      : 'There are mistakes in your solution!');
   }, [gameState.grid]);
 
   const handleSolvePuzzle = useCallback(() => {
@@ -132,6 +141,7 @@ function App() {
       timeElapsed: 0,
       isPaused: false,
     });
+    setFeedback(null);
   }, []);
 
   const handlePause = useCallback(() => {
@@ -174,6 +184,12 @@ function App() {
           {gameState.isComplete && (
             <div className="mt-4 text-center text-green-600 font-bold">
               Congratulations! You've completed the puzzle!
+            </div>
+          )}
+
+          {feedback && (
+            <div className={`mt-4 text-center font-bold ${gameState.isComplete ? 'text-green-600' : 'text-red-600'}`}>
+              {feedback}
             </div>
           )}
         </div>
