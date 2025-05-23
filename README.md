@@ -1,5 +1,7 @@
 # Sudoku Game (React + TypeScript + Vite)
 
+**Live Demo:** [https://playsudok.netlify.app/](https://playsudok.netlify.app/)
+
 A modern, themeable Sudoku game built with React, TypeScript, Vite, and Tailwind CSS.
 
 ## Features
