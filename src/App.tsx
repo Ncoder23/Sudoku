@@ -100,12 +100,11 @@ function App() {
 
     // Do not validate for invalids during play
     const validatedGrid = validateGrid(newGrid, false);
-    const isComplete = isGridComplete(validatedGrid);
 
     setGameState(prev => ({
       ...prev,
       grid: validatedGrid,
-      //isComplete,
+     
     }));
   }, [gameState.selectedCell, gameState.grid]);
 
@@ -128,6 +127,7 @@ function App() {
   }, [gameState.grid]);
 
   const handleSolvePuzzle = useCallback(() => {
+    setFeedback(null);
     setGameState(prev => ({
       ...prev,
       grid: generateSudoku(0),
