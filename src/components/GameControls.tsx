@@ -6,17 +6,19 @@ interface GameControlsProps extends GameControlsType {
 }
 
 export const GameControls: React.FC<GameControlsProps> = ({
-
+  
   onCheckSolution,
   onSolvePuzzle,
   onReset,
-  onPause,
-  isPaused,
+  
 }) => {
+  
+
   return (
     <div className="mt-4">
-      
-      <div className="grid grid-cols-2 gap-2">
+
+
+      <div className="grid grid-cols-2 gap-2 mb-4">
         <button
           onClick={onCheckSolution}
           className="p-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
@@ -29,17 +31,13 @@ export const GameControls: React.FC<GameControlsProps> = ({
         >
           Solve Puzzle
         </button>
+      </div>
+      <div className="flex justify-center">
         <button
           onClick={onReset}
-          className="p-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+          className="p-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors w-40"
         >
           Reset
-        </button>
-        <button
-          onClick={onPause}
-          className="p-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors"
-        >
-          {isPaused ? 'Resume' : 'Pause'}
         </button>
       </div>
     </div>
